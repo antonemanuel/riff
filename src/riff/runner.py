@@ -15,7 +15,14 @@ def _base_args(bypass_permissions: bool = False) -> list[str]:
 
 # Input keys to surface when showing a tool call, in priority order.
 _TOOL_ARG_KEYS = (
-    "command", "file_path", "path", "pattern", "query", "url", "description", "prompt",
+    "command",
+    "file_path",
+    "path",
+    "pattern",
+    "query",
+    "url",
+    "description",
+    "prompt",
 )
 
 

@@ -20,8 +20,14 @@ src/riff/
 
 ```bash
 uv sync
+uv run pre-commit install   # enable the local lint/format/type/yaml hooks
 uv run riff --help
 ```
+
+Dev tools (`ruff`, `ty`, `yamllint`, `pre-commit`, `pytest`) live in the
+`[dependency-groups].dev` group, which `uv sync` installs by default. The same
+checks run in CI via `uv run pre-commit run --all-files` (see
+`.github/workflows/ci.yml`), so the hook and CI share one source of truth.
 
 ## Install Globally
 

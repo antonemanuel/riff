@@ -32,10 +32,16 @@ class TestResolveGh:
 
 class TestForgeTitle:
     def test_prefers_first_heading(self):
-        assert _forge_title("# Add water filter\n\n## Problem\n...", "task") == "Add water filter"
+        assert (
+            _forge_title("# Add water filter\n\n## Problem\n...", "task")
+            == "Add water filter"
+        )
 
     def test_falls_back_to_first_task_line(self):
-        assert _forge_title("no heading here", "  Build the thing\nmore") == "Build the thing"
+        assert (
+            _forge_title("no heading here", "  Build the thing\nmore")
+            == "Build the thing"
+        )
 
     def test_truncates_to_72(self):
         title = _forge_title("", "x" * 200)
@@ -68,7 +74,9 @@ class TestRepoRoot:
 
 class TestSlugify:
     def test_basic(self):
-        assert _slugify("Add rate limiting to the API") == "add-rate-limiting-to-the-api"
+        assert (
+            _slugify("Add rate limiting to the API") == "add-rate-limiting-to-the-api"
+        )
 
     def test_strips_punctuation(self):
         assert _slugify("Fix bug #42: crash!") == "fix-bug-42-crash"
@@ -159,7 +167,10 @@ class TestSession:
         s.record_phase_session(2, "worker", "sid-ghi")
 
         iters = Session(s.root)._data["iterations"]
-        assert iters["1"] == {"worker_session_id": "sid-abc", "reviewer_session_id": "sid-def"}
+        assert iters["1"] == {
+            "worker_session_id": "sid-abc",
+            "reviewer_session_id": "sid-def",
+        }
         assert iters["2"] == {"worker_session_id": "sid-ghi"}
 
     def test_record_phase_session_ignores_none(self, tmp_path):

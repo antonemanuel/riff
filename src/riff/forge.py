@@ -14,13 +14,17 @@ class ForgeError(RuntimeError):
     """A gh/git command failed."""
 
 
-def _run(args: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
+def _run(
+    args: list[str], cwd: Path | None = None, check: bool = True
+) -> subprocess.CompletedProcess:
     try:
         proc = subprocess.run(args, cwd=cwd, capture_output=True, text=True)
     except OSError as e:
         raise ForgeError(f"could not run {args[0]!r}: {e}") from e
     if check and proc.returncode != 0:
-        raise ForgeError(f"{' '.join(args[:3])} failed: {proc.stderr.strip() or proc.stdout.strip()}")
+        raise ForgeError(
+            f"{' '.join(args[:3])} failed: {proc.stderr.strip() or proc.stdout.strip()}"
+        )
     return proc
 
 
@@ -36,9 +40,17 @@ def _parse_number(text: str) -> int:
 
 # -- issues --
 
+
 def get_issue(number: int, cwd: Path | None = None) -> dict:
     out = _run(
-        ["gh", "issue", "view", str(number), "--json", "number,title,body,comments,url,state"],
+        [
+            "gh",
+            "issue",
+            "view",
+            str(number),
+            "--json",
+            "number,title,body,comments,url,state",
+        ],
         cwd=cwd,
     )
     return json.loads(out.stdout)
@@ -54,6 +66,7 @@ def comment_issue(number: int, body: str, cwd: Path | None = None) -> None:
 
 
 # -- pull requests --
+
 
 def create_pr(
     title: str,
@@ -88,6 +101,7 @@ def mark_pr_ready(number: int, cwd: Path | None = None) -> None:
 
 
 # -- git --
+
 
 def current_branch(cwd: Path | None = None) -> str:
     return _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=cwd).stdout.strip()

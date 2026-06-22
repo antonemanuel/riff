@@ -231,18 +231,28 @@ def _run_reviewer(session: Session, project_root: Path, context_dir: Path) -> bo
         return False
 
     if not session.review_path(n).exists():
-        console.print("[red]Reviewer did not produce REVIEW.md; check reviewer.log[/red]")
+        console.print(
+            "[red]Reviewer did not produce REVIEW.md; check reviewer.log[/red]"
+        )
         return False
 
     review_text = session.review_path(n).read_text()
     approved = _is_approved(review_text)
 
     if approved:
-        console.print("\n[bold green]APPROVED[/bold green]. The reviewer accepted the work.")
+        console.print(
+            "\n[bold green]APPROVED[/bold green]. The reviewer accepted the work."
+        )
         session.approved = True
     else:
         console.print("\n[bold yellow]CHANGES REQUESTED[/bold yellow]. See review:")
-        console.print(Panel(Markdown(review_text), title="[yellow]Review[/yellow]", border_style="yellow"))
+        console.print(
+            Panel(
+                Markdown(review_text),
+                title="[yellow]Review[/yellow]",
+                border_style="yellow",
+            )
+        )
 
     return True
 
@@ -288,6 +298,7 @@ def _get_task_text(prompt: Optional[str]) -> str:
 def _find_editor() -> str:
     import os
     import shutil
+
     for var in ("VISUAL", "EDITOR"):
         val = os.environ.get(var)
         if val and shutil.which(val.split()[0]):
@@ -295,7 +306,9 @@ def _find_editor() -> str:
     for fallback in ("vim", "vi", "nano"):
         if shutil.which(fallback):
             return fallback
-    console.print("[red]No editor found. Set $VISUAL or $EDITOR, or use --prompt.[/red]")
+    console.print(
+        "[red]No editor found. Set $VISUAL or $EDITOR, or use --prompt.[/red]"
+    )
     raise typer.Exit(1)
 
 
@@ -353,7 +366,9 @@ def _forge_get(action: str, fn: Callable[[], _T]) -> _T | None:
         return None
 
 
-def _forge_sync_issue(session: Session, project_root: Path, issue_mode: str | int | None) -> None:
+def _forge_sync_issue(
+    session: Session, project_root: Path, issue_mode: str | int | None
+) -> None:
     """After planning: create the issue from ISSUE.md, or annotate an existing one."""
     issue_text = _read(session.issue_path)
     if issue_mode == "create":
@@ -369,26 +384,38 @@ def _forge_sync_issue(session: Session, project_root: Path, issue_mode: str | in
         issue_no = issue_mode
         _forge_do(
             f"comment issue #{issue_no}",
-            lambda: forge.comment_issue(issue_no, f"### riff plan\n\n{issue_text}", project_root),
+            lambda: forge.comment_issue(
+                issue_no, f"### riff plan\n\n{issue_text}", project_root
+            ),
         )
 
 
-def _forge_setup_branch(session: Session, project_root: Path, pr_mode: str | int) -> None:
+def _forge_setup_branch(
+    session: Session, project_root: Path, pr_mode: str | int
+) -> None:
     if isinstance(pr_mode, int):
         pr_no = pr_mode
-        if _forge_do(f"checkout PR #{pr_no}", lambda: forge.checkout_pr(pr_no, project_root)):
+        if _forge_do(
+            f"checkout PR #{pr_no}", lambda: forge.checkout_pr(pr_no, project_root)
+        ):
             session.pr_number = pr_no
-            session.branch = _forge_get("read branch", lambda: forge.current_branch(project_root))
+            session.branch = _forge_get(
+                "read branch", lambda: forge.current_branch(project_root)
+            )
     else:  # "create"
         base = _forge_get("read branch", lambda: forge.current_branch(project_root))
         name = f"riff/{session.root.name}"
-        if _forge_do(f"create branch {name}", lambda: forge.create_branch(name, project_root)):
+        if _forge_do(
+            f"create branch {name}", lambda: forge.create_branch(name, project_root)
+        ):
             session.branch = name
             session.base_branch = base
 
 
 def _forge_commit_push(session: Session, project_root: Path, n: int) -> bool:
-    if not _forge_get("git status", lambda: forge.has_uncommitted_changes(project_root)):
+    if not _forge_get(
+        "git status", lambda: forge.has_uncommitted_changes(project_root)
+    ):
         return False
     title = _forge_title(_read(session.issue_path), session.task)
     if not _forge_do(
@@ -404,7 +431,11 @@ def _forge_commit_push(session: Session, project_root: Path, n: int) -> bool:
 
 def _forge_open_pr(session: Session, project_root: Path) -> None:
     title = _forge_title(_read(session.issue_path), session.task)
-    body = _read(session.pr_path(session.iteration)) or _read(session.issue_path) or session.task
+    body = (
+        _read(session.pr_path(session.iteration))
+        or _read(session.issue_path)
+        or session.task
+    )
     issue_no = session.issue_number
     if issue_no is not None:
         body += f"\n\nCloses #{issue_no}"
@@ -415,11 +446,15 @@ def _forge_open_pr(session: Session, project_root: Path) -> None:
     )
     if num is not None:
         session.pr_number = num
-        console.print(f"[green]Opened draft PR #{num}[/green] [dim](marked ready on approval)[/dim]")
+        console.print(
+            f"[green]Opened draft PR #{num}[/green] [dim](marked ready on approval)[/dim]"
+        )
         if issue_no is not None:
             _forge_do(
                 "link issue",
-                lambda: forge.comment_issue(issue_no, f"Tracked by PR #{num}.", project_root),
+                lambda: forge.comment_issue(
+                    issue_no, f"Tracked by PR #{num}.", project_root
+                ),
             )
 
 
@@ -429,7 +464,9 @@ def _forge_post_review(session: Session, project_root: Path, n: int) -> None:
     if pr_no is not None and review:
         _forge_do(
             f"post review #{n}",
-            lambda: forge.comment_pr(pr_no, f"### riff review (iteration {n})\n\n{review}", project_root),
+            lambda: forge.comment_pr(
+                pr_no, f"### riff review (iteration {n})\n\n{review}", project_root
+            ),
         )
 
 
@@ -438,45 +475,61 @@ def run(
     prompt: Annotated[
         Optional[str],
         typer.Option(
-            "--prompt", "-p",
+            "--prompt",
+            "-p",
             help="Task description (string) or path to a .md file. "
-                 "Omit to open $EDITOR (default: vim).",
+            "Omit to open $EDITOR (default: vim).",
         ),
     ] = None,
     context_dir: Annotated[
         Optional[Path],
-        typer.Option("--context-dir", "-c", help="Directory containing PLANNER.md, WORKER.md and REVIEWER.md"),
+        typer.Option(
+            "--context-dir",
+            "-c",
+            help="Directory containing PLANNER.md, WORKER.md and REVIEWER.md",
+        ),
     ] = None,
     gh: Annotated[
         bool,
         typer.Option(
             "--gh",
             help="Enable GitHub integration (via gh): create a new issue + draft PR. "
-                 "Add --issue/--pr to use existing ones instead.",
+            "Add --issue/--pr to use existing ones instead.",
         ),
     ] = False,
     issue: Annotated[
         Optional[int],
-        typer.Option("--issue", help="Use existing issue #N instead of creating one (requires --gh)."),
+        typer.Option(
+            "--issue",
+            help="Use existing issue #N instead of creating one (requires --gh).",
+        ),
     ] = None,
     pr: Annotated[
         Optional[int],
-        typer.Option("--pr", help="Use existing PR #N instead of creating one (requires --gh)."),
+        typer.Option(
+            "--pr", help="Use existing PR #N instead of creating one (requires --gh)."
+        ),
     ] = None,
-    max_iterations: Annotated[int, typer.Option("--max-iter", help="Safety limit")] = 10,
+    max_iterations: Annotated[
+        int, typer.Option("--max-iter", help="Safety limit")
+    ] = 10,
 ) -> None:
     """Run a new riff session: plan → work → review loop."""
     issue_mode, pr_mode = _resolve_gh(gh, issue, pr)
     project_root = _project_root()
 
     if gh and not forge.gh_available():
-        console.print("[yellow]gh CLI not available or not authenticated; GitHub integration disabled for this run.[/yellow]")
+        console.print(
+            "[yellow]gh CLI not available or not authenticated; GitHub integration disabled for this run.[/yellow]"
+        )
         issue_mode = pr_mode = None
 
     # Resolve the task — seed from an existing issue if one was given.
     if isinstance(issue_mode, int):
         issue_no = issue_mode
-        data = _forge_get(f"fetch issue #{issue_no}", lambda: forge.get_issue(issue_no, project_root))
+        data = _forge_get(
+            f"fetch issue #{issue_no}", lambda: forge.get_issue(issue_no, project_root)
+        )
         if data:
             task_text = f"# {data['title']}\n\n{data.get('body') or ''}".strip()
             if prompt:
@@ -516,7 +569,9 @@ def run(
     session.status = "planning"
     ok = _run_planner(session, task_text, project_root, ctx_dir)
     if not ok:
-        console.print("[red]Planning did not complete. Run `riff run` to begin a new session.[/red]")
+        console.print(
+            "[red]Planning did not complete. Run `riff run` to begin a new session.[/red]"
+        )
         raise typer.Exit(1)
 
     console.print(f"\n[green]ISSUE.md written:[/green] {session.issue_path}")
@@ -547,7 +602,9 @@ def _run_loop(
         # Worker phase
         session.status = "working"
         if not _run_worker(session, project_root, ctx_dir):
-            console.print("[red]Worker failed. Check the worker log in the session dir.[/red]")
+            console.print(
+                "[red]Worker failed. Check the worker log in the session dir.[/red]"
+            )
             sys.exit(1)
 
         # Commit + push the worker's changes; open the draft PR after the first commit.
@@ -559,7 +616,9 @@ def _run_loop(
         # Reviewer phase
         session.status = "reviewing"
         if not _run_reviewer(session, project_root, ctx_dir):
-            console.print("[red]Reviewer failed. Check the reviewer log in the session dir.[/red]")
+            console.print(
+                "[red]Reviewer failed. Check the reviewer log in the session dir.[/red]"
+            )
             sys.exit(1)
 
         if session.pr_number is not None:
@@ -569,7 +628,9 @@ def _run_loop(
             session.status = "done"
             pr_no = session.pr_number
             if pr_no is not None:
-                _forge_do("mark PR ready", lambda: forge.mark_pr_ready(pr_no, project_root))
+                _forge_do(
+                    "mark PR ready", lambda: forge.mark_pr_ready(pr_no, project_root)
+                )
             _print_done(session)
             return
 
@@ -601,7 +662,9 @@ def sessions() -> None:
         return
 
     for s in all_sessions:
-        status_color = "green" if s.approved else "cyan" if s.status == "done" else "yellow"
+        status_color = (
+            "green" if s.approved else "cyan" if s.status == "done" else "yellow"
+        )
         console.print(
             f"[{status_color}]{s.root.name}[/{status_color}]  "
             f"[dim]{s.status} | iter {s.iteration}[/dim]  "
@@ -632,7 +695,9 @@ def config_set_context_dir(
     set_context_dir(path)
     _ensure_context_dir(path.expanduser().resolve())
     console.print(f"[green]Context dir set to:[/green] {path.expanduser().resolve()}")
-    console.print("Edit PLANNER.md, WORKER.md and REVIEWER.md there to customize agent behavior.")
+    console.print(
+        "Edit PLANNER.md, WORKER.md and REVIEWER.md there to customize agent behavior."
+    )
 
 
 @app.command()

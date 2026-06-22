@@ -25,8 +25,8 @@ TASK
 
 PROJECT CONTEXT (read-only, for understanding only — do NOT start implementing yet)
 ---------------
-{f'CLAUDE.md:{chr(10)}{claude_md}' if claude_md else '(no CLAUDE.md found)'}
-{f'PLANNER.md (your custom instructions):{chr(10)}{planner_context}' if planner_context else ''}
+{f"CLAUDE.md:{chr(10)}{claude_md}" if claude_md else "(no CLAUDE.md found)"}
+{f"PLANNER.md (your custom instructions):{chr(10)}{planner_context}" if planner_context else ""}
 
 YOUR JOB RIGHT NOW
 ------------------
@@ -125,12 +125,12 @@ original sections intact. Keep amendments minimal — the reviewer will scrutini
 PROJECT CONTEXT
 ---------------
 Project root: {project_root}
-{f'CLAUDE.md:{chr(10)}{claude_md}' if claude_md else '(no CLAUDE.md)'}
-{f'WORKER.md (your custom instructions):{chr(10)}{worker_context}' if worker_context else ''}
+{f"CLAUDE.md:{chr(10)}{claude_md}" if claude_md else "(no CLAUDE.md)"}
+{f"WORKER.md (your custom instructions):{chr(10)}{worker_context}" if worker_context else ""}
 
 ISSUE TO IMPLEMENT
 ------------------
-{issue_text if issue_text else f'(read from {issue_path})'}
+{issue_text if issue_text else f"(read from {issue_path})"}
 {history_section}{review_section}{amendments_note}{forge_note}
 YOUR JOB
 --------
@@ -168,16 +168,16 @@ def reviewer(
 PROJECT CONTEXT
 ---------------
 Project root: {project_root}
-{f'CLAUDE.md:{chr(10)}{claude_md}' if claude_md else '(no CLAUDE.md)'}
-{f'REVIEWER.md (your review guidelines):{chr(10)}{reviewer_context}' if reviewer_context else ''}
+{f"CLAUDE.md:{chr(10)}{claude_md}" if claude_md else "(no CLAUDE.md)"}
+{f"REVIEWER.md (your review guidelines):{chr(10)}{reviewer_context}" if reviewer_context else ""}
 
 ISSUE
 -----
-{issue_text if issue_text else f'(read from {issue_path})'}
+{issue_text if issue_text else f"(read from {issue_path})"}
 
 PR SUMMARY
 ----------
-{pr_text if pr_text else f'(read from {pr_path})'}
+{pr_text if pr_text else f"(read from {pr_path})"}
 
 YOUR JOB
 --------
