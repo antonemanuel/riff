@@ -48,3 +48,7 @@ uv run pytest
 - Python 3.11+, typed where practical
 - No comments unless the why is non-obvious
 - Keep prompts.py as the single source of truth for all agent instructions
+
+## Commits
+
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages (e.g. `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`), optionally with a scope like `feat(forge): ...`
