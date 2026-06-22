@@ -83,6 +83,25 @@ sbx exec -it <sandbox-name> -- riff run -p "add rate limiting to the API"
 > not carry over. `.riff/sessions/` is written inside the sandbox; use `sbx cp`
 > to pull logs out if you want them on the host.
 
+## Security
+
+riff runs the worker and reviewer agents with `claude --dangerously-skip-permissions`,
+so they execute commands and edit files **without any approval prompts**. Two things
+follow from that:
+
+- **Untrusted issue/PR content reaches a permission-bypassed agent.** With `--gh`
+  (especially `--issue N` / `--pr N`), riff fetches the issue/PR **title and body**
+  via `gh` and feeds them into the agent prompts. Anyone who can open or comment on
+  that issue/PR can therefore inject instructions the agent may act on — and because
+  permissions are skipped, that can mean **arbitrary command execution** on whatever
+  machine riff runs on, plus commits/pushes under your git identity.
+- **The blast radius is wherever riff runs.** On your host, that's your host.
+
+**Always run riff inside a sandbox** (see [Running in a sandbox](#running-in-a-sandbox-recommended)),
+and only point `--gh` at repositories whose issues/PRs you trust. Treat `--issue` /
+`--pr` against repos with untrusted contributors as running untrusted input — never do
+it outside an isolated box.
+
 ## Configuration
 
 Context files (`PLANNER.md`, `WORKER.md`, `REVIEWER.md`) live at `~/.config/riff/` by default.
