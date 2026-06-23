@@ -15,7 +15,6 @@ def planner(
     planner_md: Path,
 ) -> str:
     planner_context = _read_if_exists(planner_md)
-    claude_md = _read_if_exists(project_root / "CLAUDE.md")
 
     return f"""You are the riff PLANNER, running INTERACTIVELY.
 
@@ -25,7 +24,7 @@ TASK
 
 PROJECT CONTEXT (read-only, for understanding only — do NOT start implementing yet)
 ---------------
-{f"CLAUDE.md:{chr(10)}{claude_md}" if claude_md else "(no CLAUDE.md found)"}
+Follow the project's CLAUDE.md conventions (Claude Code loads it automatically).
 {f"PLANNER.md (your custom instructions):{chr(10)}{planner_context}" if planner_context else ""}
 
 YOUR JOB RIGHT NOW
@@ -60,7 +59,6 @@ def worker(
     pr_number: int | None = None,
 ) -> str:
     worker_context = _read_if_exists(worker_md)
-    claude_md = _read_if_exists(project_root / "CLAUDE.md")
     issue_text = _read_if_exists(issue_path)
     review_text = _read_if_exists(prev_review_path) if prev_review_path else ""
 
@@ -125,7 +123,7 @@ original sections intact. Keep amendments minimal — the reviewer will scrutini
 PROJECT CONTEXT
 ---------------
 Project root: {project_root}
-{f"CLAUDE.md:{chr(10)}{claude_md}" if claude_md else "(no CLAUDE.md)"}
+Follow the project's CLAUDE.md conventions (Claude Code loads it automatically).
 {f"WORKER.md (your custom instructions):{chr(10)}{worker_context}" if worker_context else ""}
 
 ISSUE TO IMPLEMENT
@@ -159,7 +157,6 @@ def reviewer(
     iteration: int,
 ) -> str:
     reviewer_context = _read_if_exists(reviewer_md)
-    claude_md = _read_if_exists(project_root / "CLAUDE.md")
     issue_text = _read_if_exists(issue_path)
     pr_text = _read_if_exists(pr_path)
 
@@ -168,7 +165,7 @@ def reviewer(
 PROJECT CONTEXT
 ---------------
 Project root: {project_root}
-{f"CLAUDE.md:{chr(10)}{claude_md}" if claude_md else "(no CLAUDE.md)"}
+Follow the project's CLAUDE.md conventions (Claude Code loads it automatically).
 {f"REVIEWER.md (your review guidelines):{chr(10)}{reviewer_context}" if reviewer_context else ""}
 
 ISSUE
